@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { doc, setDoc, updateDoc, onSnapshot, deleteDoc, getDoc } from 'firebase/firestore';
+import RulesModal from './components/rulesModel';
 import './App.css'
 // Import Firebase config and instances
 import { db, APP_ID } from './firebase/config';
@@ -24,6 +25,7 @@ const App = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState('');
   const [selectedCards, setSelectedCards] = useState([]);
+  const [showRules, setShowRules] = useState(false);
 
   // Use the custom Firebase auth hook
   const { userId, isAuthReady } = useFirebaseAuth(setMessage);
@@ -503,11 +505,29 @@ const App = () => {
     );
   }
 
+  //JSX code 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 text-white font-inter p-4 flex flex-col items-center justify-center">
+  <div className="min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 text-white font-inter p-4 flex flex-col items-center justify-center relative">
+    {/* 📜 Rules Button */}
+    <button
+      className="absolute top-4 right-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md shadow-md text-sm"
+      onClick={() => setShowRules(!showRules)}
+    >
+      {showRules ? '❌ Close' : '📜 Rules'}
+    </button>
+
+    {/* 🧾 Rules Modal */}
+    {showRules ? (
+      <RulesModal />
+    ) : (
       <div className="max-w-4xl w-full bg-gray-800 rounded-lg shadow-2xl p-8 border border-gray-700">
         <h1 className="text-4xl font-extrabold text-center mb-6 text-indigo-400">SHOW</h1>
-        <p className="text-center text-gray-300 mb-6">Your User ID: <span className="font-mono bg-gray-700 px-2 py-1 rounded text-sm">{userId || 'N/A'}</span></p>
+        <p className="text-center text-gray-300 mb-6">
+          Your User ID:{" "}
+          <span className="font-mono bg-gray-700 px-2 py-1 rounded text-sm">
+            {userId || "N/A"}
+          </span>
+        </p>
 
         {message && (
           <div className="bg-blue-500 text-white p-3 rounded-md mb-4 text-center">
@@ -541,8 +561,52 @@ const App = () => {
           />
         )}
       </div>
-    </div>
-  );
+    )}
+  </div>
+);
 };
 
 export default App;
+//   return (
+//     <div className="min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 text-white font-inter p-4 flex flex-col items-center justify-center">
+//       <div className="max-w-4xl w-full bg-gray-800 rounded-lg shadow-2xl p-8 border border-gray-700">
+//         <h1 className="text-4xl font-extrabold text-center mb-6 text-indigo-400">SHOW</h1>
+//         <p className="text-center text-gray-300 mb-6">Your User ID: <span className="font-mono bg-gray-700 px-2 py-1 rounded text-sm">{userId || 'N/A'}</span></p>
+
+//         {message && (
+//           <div className="bg-blue-500 text-white p-3 rounded-md mb-4 text-center">
+//             {message}
+//           </div>
+//         )}
+
+//         {showModal && (
+//           <Modal content={modalContent} onClose={hideCustomModal} />
+//         )}
+
+//         {!currentGame ? (
+//           <Lobby
+//             createGame={createGame}
+//             joinGame={joinGame}
+//             joinGameIdInput={joinGameIdInput}
+//             setJoinGameIdInput={setJoinGameIdInput}
+//           />
+//         ) : (
+//           <GameBoard
+//             currentGame={currentGame}
+//             userId={userId}
+//             isMyTurn={currentGame.currentTurnPlayerId === userId}
+//             startGame={startGame}
+//             playCards={playCards}
+//             callShow={callShow}
+//             resetRound={resetRound}
+//             leaveGame={leaveGame}
+//             selectedCards={selectedCards}
+//             toggleCardSelection={toggleCardSelection}
+//           />
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default App;

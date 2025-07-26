@@ -9,3 +9,15 @@ body {
   /* Ensure the body has a background to see the gradients */
   background-color: #1a202c; /* A dark gray fallback */
 }
+.rules-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 8px 12px;
+  font-size: 14px;
+  background-color: #222;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
