@@ -506,7 +506,7 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 text-white font-inter p-4 flex flex-col items-center justify-center">
       <div className="max-w-4xl w-full bg-gray-800 rounded-lg shadow-2xl p-8 border border-gray-700">
-        <h1 className="text-4xl font-extrabold text-center mb-6 text-indigo-400">Lowest Sum</h1>
+        <h1 className="text-4xl font-extrabold text-center mb-6 text-indigo-400">SHOW</h1>
         <p className="text-center text-gray-300 mb-6">Your User ID: <span className="font-mono bg-gray-700 px-2 py-1 rounded text-sm">{userId || 'N/A'}</span></p>
 
         {message && (
