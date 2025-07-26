@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { doc, setDoc, updateDoc, onSnapshot, deleteDoc, getDoc } from 'firebase/firestore';
-import RulesModal from './components/rulesModel';
+import RulesModal from './components/RulesModel';
 import './App.css'
 // Import Firebase config and instances
 import { db, APP_ID } from './firebase/config';
@@ -364,35 +364,66 @@ const App = () => {
 
     const callingPlayer = playersWithRevealedHands.find(p => p.id === userId);
 
-    if (lowestSumPlayers.length === 1 && lowestSumPlayers[0].id === userId) {
-      showMessage = `${callingPlayer.name} called 'Show' and has the lowest sum (${lowestSum})! They get 0 points.`;
-      newPlayersState = newPlayersState.map(p => {
-        const revealedPlayer = playersWithRevealedHands.find(rp => rp.id === p.id);
-        if (p.id === userId) {
-          return { ...p, score: p.score + 0 };
-        } else {
-          return { ...p, score: p.score + revealedPlayer.currentHandSum };
-        }
-      });
-    } else {
-      showMessage = `${callingPlayer.name} called 'Show' but did not have the lowest sum (${callingPlayer.currentHandSum}). `;
-      if (lowestSumPlayers.length === 1) {
-        showMessage += `${lowestSumPlayers[0].name} had the lowest sum (${lowestSum}).`;
-      } else {
-        showMessage += `It was a tie for the lowest sum (${lowestSum}) between: ${lowestSumPlayers.map(p => p.name).join(', ')}.`;
-      }
+    // if (lowestSumPlayers.length === 1 && lowestSumPlayers[0].id === userId) {
+    //   showMessage = `${callingPlayer.name} called 'Show' and has the lowest sum (${lowestSum})! They get 0 points.`;
+    //   newPlayersState = newPlayersState.map(p => {
+    //     const revealedPlayer = playersWithRevealedHands.find(rp => rp.id === p.id);
+    //     if (p.id === userId) {
+    //       return { ...p, score: p.score + 0 };
+    //     } else {
+    //       return { ...p, score: p.score + revealedPlayer.currentHandSum };
+    //     }
+    //   });
+    // } else {
+    //   showMessage = `${callingPlayer.name} called 'Show' but did not have the lowest sum (${callingPlayer.currentHandSum}). `;
+    //   if (lowestSumPlayers.length === 1) {
+    //     showMessage += `${lowestSumPlayers[0].name} had the lowest sum (${lowestSum}).`;
+    //   } else {
+    //     showMessage += `It was a tie for the lowest sum (${lowestSum}) between: ${lowestSumPlayers.map(p => p.name).join(', ')}.`;
+    //   }
 
-      newPlayersState = newPlayersState.map(p => {
-        const revealedPlayer = playersWithRevealedHands.find(rp => rp.id === p.id);
-        if (p.id === userId) {
-          return { ...p, score: p.score + 50 };
-        } else if (lowestSumPlayers.some(lsp => lsp.id === p.id)) {
-          return { ...p, score: p.score + 0 };
-        } else {
-          return { ...p, score: p.score + revealedPlayer.currentHandSum };
-        }
-      });
+    //   newPlayersState = newPlayersState.map(p => {
+    //     const revealedPlayer = playersWithRevealedHands.find(rp => rp.id === p.id);
+    //     if (p.id === userId) {
+    //       return { ...p, score: p.score + 50 };
+    //     } else if (lowestSumPlayers.some(lsp => lsp.id === p.id)) {
+    //       return { ...p, score: p.score + 0 };
+    //     } else {
+    //       return { ...p, score: p.score + revealedPlayer.currentHandSum };
+    //     }
+    //   });
+    // }
+    if (lowestSumPlayers.some(p => p.id === userId)) {
+  showMessage = `${callingPlayer.name} called 'Show' and has the lowest sum (${lowestSum})! They get 0 points.`;
+
+  newPlayersState = newPlayersState.map(p => {
+    const revealedPlayer = playersWithRevealedHands.find(rp => rp.id === p.id);
+    if (p.id === userId) {
+      return { ...p, score: p.score + 0 };
+    } else {
+      return { ...p, score: p.score + revealedPlayer.currentHandSum };
     }
+  });
+} else {
+  showMessage = `${callingPlayer.name} called 'Show' but did not have the lowest sum (${callingPlayer.currentHandSum}). `;
+  if (lowestSumPlayers.length === 1) {
+    showMessage += `${lowestSumPlayers[0].name} had the lowest sum (${lowestSum}).`;
+  } else {
+    showMessage += `It was a tie for the lowest sum (${lowestSum}) between: ${lowestSumPlayers.map(p => p.name).join(', ')}.`;
+  }
+
+  newPlayersState = newPlayersState.map(p => {
+    const revealedPlayer = playersWithRevealedHands.find(rp => rp.id === p.id);
+    if (p.id === userId) {
+      return { ...p, score: p.score + 50 };
+    } else if (lowestSumPlayers.some(lsp => lsp.id === p.id)) {
+      return { ...p, score: p.score + 0 };
+    } else {
+      return { ...p, score: p.score + revealedPlayer.currentHandSum };
+    }
+  });
+}
+
 
     try {
       await updateDoc(gameRef, {
@@ -413,7 +444,6 @@ const App = () => {
       showCustomModal("You are not the host or game is not ready.");
       return;
     }
-
     const gameRef = doc(db, `artifacts/${APP_ID}/public/data/games`, currentGame.gameId);
     const numPlayers = currentGame.players.length;
     const numDecks = Math.round(Math.sqrt(numPlayers));
@@ -454,7 +484,7 @@ const App = () => {
         lastAction: `New round started by host. Dealing cards...`,
         revealedHands: null,
       });
-      setMessage(`Round ${currentGame.roundNumber + 1} started! It's ${currentGame.players[0].name}'s turn.`);
+      setMessage(`It's ${currentGame.players[0].name}'s turn.`);
     } catch (e) {
       console.error("Error resetting round:", e);
       showCustomModal("Failed to reset round.");

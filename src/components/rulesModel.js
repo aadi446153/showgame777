@@ -16,7 +16,6 @@ const RulesModal = () => {
         <li>Deck size depends on number of players (1 deck for 2-4, 2 decks for 5-6, etc).</li>
         <li>The remaining cards go to the draw pile, and one starts the discard pile.</li>
       </ul>
-
       <h3 className="text-xl font-semibold mt-4 text-indigo-300">🔁 Gameplay</h3>
       <ul className="list-disc list-inside mb-4">
         <li>Players take turns clockwise.</li>
