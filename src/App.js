@@ -11,6 +11,7 @@ import useFirebaseAuth from './hooks/useFirebaseAuth';
 // Import Utils
 import { createDeck,reshuffleDeck } from './utils/deckUtils';
 import { advanceTurn, performDrawCard, calculateHandSum } from './utils/gameHelpers';
+import { playSound } from './utils/soundEffects';
 
 // Import Components
 import Modal from './components/Modal';
@@ -219,7 +220,7 @@ const App = () => {
       const gameRef = doc(db, `artifacts/${APP_ID}/public/data/games`, currentGame.gameId);
       const docSnap = await getDoc(gameRef);
       const freshGame = docSnap.data();
-
+      await playSound("card_play");
       await performDrawCard(
         db,
         APP_ID,
@@ -245,6 +246,7 @@ const App = () => {
     const currentPlayer = currentGame.players[playerIndex];
     const filteredLength = currentPlayer.hand.filter(card => card).length; // Filter out falsy values (null, undefined, etc.)
     console.log(`${currentPlayer.name}'s hand length (without null): ${filteredLength}`);
+    await playSound("card_play");
     if (filteredLength === 0) {
       await drawCardAfterPlay();
     }
@@ -264,11 +266,6 @@ const App = () => {
     }
     const matchesTopCard = topDiscardCard && selectedCards[0].rank === topDiscardCard.rank;
     console.log("Does played card match top discard card?", matchesTopCard);
-    // const filteredLength = currentPlayer.hand.filter(card => card).length; // Filter out falsy values (null, undefined, etc.)
-    // console.log(`${currentPlayer.name}'s hand length (without null): ${filteredLength}`);
-    // if (filteredLength === 0) {
-    //   await drawCardAfterPlay();
-    // }
     const updatedHand = currentPlayer.hand.filter(
       handCard =>
         !selectedCards.some(
@@ -291,18 +288,9 @@ const App = () => {
         discardPile: newDiscardPile,
         lastAction: `${currentPlayer.name} played ${selectedCards.length} card(s).`,
       });
-
+      
       setSelectedCards([]);
       await advanceTurn(db, APP_ID, currentGame);
-      //     if (!matchesTopCard) {
-      //   // ✅ Draw card separately
-      //   await drawCardAfterPlay();
-      // }
-      // const postPlayLength = updatedHand.filter(card => card).length;
-      // console.log(`${currentPlayer.name}'s hand length after play: ${postPlayLength}`);
-      // if (postPlayLength === 0) {
-      //   await drawCardAfterPlay();
-      // }
       const postPlayLength = updatedHand.filter(card => card).length;
       console.log(`${currentPlayer.name}'s hand length after play: ${postPlayLength}`);
 
@@ -328,6 +316,7 @@ const App = () => {
       showCustomModal("It's not your turn or game is not in playing state.");
       return;
     }
+    // await playSound("show_called"); // ✅ Add this line
 
     // Rule: You must complete at least 2 full rounds before calling a 'Show'.
     // If roundNumber is 1, 0 rounds completed.
@@ -364,35 +353,7 @@ const App = () => {
 
     const callingPlayer = playersWithRevealedHands.find(p => p.id === userId);
 
-    // if (lowestSumPlayers.length === 1 && lowestSumPlayers[0].id === userId) {
-    //   showMessage = `${callingPlayer.name} called 'Show' and has the lowest sum (${lowestSum})! They get 0 points.`;
-    //   newPlayersState = newPlayersState.map(p => {
-    //     const revealedPlayer = playersWithRevealedHands.find(rp => rp.id === p.id);
-    //     if (p.id === userId) {
-    //       return { ...p, score: p.score + 0 };
-    //     } else {
-    //       return { ...p, score: p.score + revealedPlayer.currentHandSum };
-    //     }
-    //   });
-    // } else {
-    //   showMessage = `${callingPlayer.name} called 'Show' but did not have the lowest sum (${callingPlayer.currentHandSum}). `;
-    //   if (lowestSumPlayers.length === 1) {
-    //     showMessage += `${lowestSumPlayers[0].name} had the lowest sum (${lowestSum}).`;
-    //   } else {
-    //     showMessage += `It was a tie for the lowest sum (${lowestSum}) between: ${lowestSumPlayers.map(p => p.name).join(', ')}.`;
-    //   }
 
-    //   newPlayersState = newPlayersState.map(p => {
-    //     const revealedPlayer = playersWithRevealedHands.find(rp => rp.id === p.id);
-    //     if (p.id === userId) {
-    //       return { ...p, score: p.score + 50 };
-    //     } else if (lowestSumPlayers.some(lsp => lsp.id === p.id)) {
-    //       return { ...p, score: p.score + 0 };
-    //     } else {
-    //       return { ...p, score: p.score + revealedPlayer.currentHandSum };
-    //     }
-    //   });
-    // }
     if (lowestSumPlayers.some(p => p.id === userId)) {
   showMessage = `${callingPlayer.name} called 'Show' and has the lowest sum (${lowestSum})! They get 0 points.`;
 
@@ -426,6 +387,7 @@ const App = () => {
 
 
     try {
+      await playSound("show_called"); // ✅ Add this line
       await updateDoc(gameRef, {
         players: newPlayersState,
         status: 'show_called',

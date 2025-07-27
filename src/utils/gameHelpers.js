@@ -1,6 +1,6 @@
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { getCardName,reshuffleDeck } from './deckUtils'; // Assuming deckUtils is in the same parent directory
-
+import { playSound } from './soundEffects';
 // Advances the turn to the next player in the game
 export const advanceTurn = async (db, appId, gameData) => {
   if (!db || !gameData) return;
@@ -33,39 +33,6 @@ export const advanceTurn = async (db, appId, gameData) => {
     // You might want to pass a setMessage function here to update UI
   }
 };
-
-// Draws a card from the deck for a specified player
-// export const performDrawCard = async (db, appId, gameData, playerToDrawId, actionMessage, showCustomModal) => {
-//   const gameRef = doc(db, `artifacts/${appId}/public/data/games`, gameData.gameId);
-//   let currentDeck = [...gameData.deck];
-//   const playerIndex = gameData.players.findIndex(p => p.id === playerToDrawId);
-//   const player = gameData.players[playerIndex];
-
-//   if (currentDeck.length === 0) {
-//     showCustomModal("Deck is empty! Cannot draw a card.");
-//     return false; // Indicate draw failed
-//   }
-
-//   const drawnCard = currentDeck.shift();
-//   const updatedHand = [...player.hand, drawnCard];
-//   const updatedPlayers = [...gameData.players];
-//   updatedPlayers[playerIndex] = { ...player, hand: updatedHand };
-
-//   try {
-//     await updateDoc(gameRef, {
-//       deck: currentDeck,
-//       players: updatedPlayers,
-//       lastAction: actionMessage,
-//     });
-//     return true; // Indicate draw successful
-//   } catch (e) {
-//     console.error("Error drawing card:", e);
-//     showCustomModal("Failed to draw card.");
-//     return false; // Indicate draw failed
-//   }
-// };
-
-
 export const performDrawCard = async (db, appId, gameData, playerToDrawId, actionMessage, showCustomModal) => {
   const gameRef = doc(db, `artifacts/${appId}/public/data/games`, gameData.gameId);
   let currentDeck = [...gameData.deck];
@@ -75,6 +42,7 @@ export const performDrawCard = async (db, appId, gameData, playerToDrawId, actio
   if (currentDeck.length === 0) {
     console.log("Deck empty — reshuffling discard pile...");
     showCustomModal("Deck empty — reshuffling discard pile...")
+    await playSound("reshuffle"); // ✅ Add this line
     const reshuffled = reshuffleDeck(gameData.discardPile, gameData.players);
     if (reshuffled.length === 0) {
       showCustomModal("No cards left to reshuffle. Cannot draw a card.");
